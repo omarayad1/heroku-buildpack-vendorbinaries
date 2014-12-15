@@ -1,15 +1,11 @@
 #!/bin/bash
 
-env_dir=$3
-whitelist_regex=${2:-'(FTP_HOST|FTP_USERNAME|FTP_PASSWORD)$'}
-blacklist_regex=${3:-'^(PATH|GIT_DIR|CPATH|CPPATH|LD_PRELOAD|LIBRARY_PATH)$'}
-if [ -d "$env_dir" ]; then
-  for e in $(ls $env_dir); do
-    echo "$e" | grep -E "$whitelist_regex" | grep -qvE "$blacklist_regex" &&
-    export "$e=$(cat $env_dir/$e)"
-    :
-  done
-fi
+ENV_DIR=$3 # remember, it was the 3rd parameter passed in up there
+for KEY in FTP_USERNAME FTP_PASSWORD FTP_HOST; do
+  [ -f $ENV_DIR/$KEY ] && export "$KEY=$(cat $ENV_DIR/$KEY)"
+  [ -z "${!KEY}" ] && echo "You didn't set $KEY, and this is required." && exit 1
+done
+echo "HOORAY, you set the variables! ENV_VAR1: $ENV_VAR1; ENV_VAR2: $ENV_VAR2."
 
 
 indent() {
