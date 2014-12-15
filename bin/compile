@@ -1,17 +1,16 @@
 #!/bin/bash
 
-export_env_dir() {
-  env_dir=$3
-  whitelist_regex=${2:-'$(FTP_HOST|FTP_USERNAME|FTP_PASSWORD)'}
-  blacklist_regex=${3:-'^(PATH|GIT_DIR|CPATH|CPPATH|LD_PRELOAD|LIBRARY_PATH)$'}
-  if [ -d "$env_dir" ]; then
-    for e in $(ls $env_dir); do
-      echo "$e" | grep -E "$whitelist_regex" | grep -qvE "$blacklist_regex" &&
-      export "$e=$(cat $env_dir/$e)"
-      :
-    done
-  fi
-}
+env_dir=$3
+whitelist_regex=${2:-'(FTP_HOST|FTP_USERNAME|FTP_PASSWORD)$'}
+blacklist_regex=${3:-'^(PATH|GIT_DIR|CPATH|CPPATH|LD_PRELOAD|LIBRARY_PATH)$'}
+if [ -d "$env_dir" ]; then
+  for e in $(ls $env_dir); do
+    echo "$e" | grep -E "$whitelist_regex" | grep -qvE "$blacklist_regex" &&
+    export "$e=$(cat $env_dir/$e)"
+    :
+  done
+fi
+
 
 indent() {
   sed -u 's/^/       /'
@@ -26,7 +25,6 @@ if [ ! -s $1/.vendor_urls ]; then
 fi
 
 cd $1
-export_env_dir
 while read url; do
   if [ -n "$url" ]; then # incase ensure_newline_at_eof_on_save is enabled
     eval echo Vendoring $url | indent
